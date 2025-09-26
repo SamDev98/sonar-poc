@@ -1,0 +1,54 @@
+name: CI & SonarQube PR Decoration (on-prem)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-sonar-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read   # suficiente para checkout; PR decoration é via GitHub App no Sonar
+
+jobs:
+  build-and-analyze:
+    runs-on: local-sonar
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Ensure mvnw is executable
+        run: chmod +x mvnw
+
+      - name: Build & Test
+        run: ./mvnw -B -U clean verify
+
+      - name: SonarQube Scan (Maven goal)
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # http://localhost:9000
+          SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
+        run: ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
+      - name: SonarQube Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1.2.0
+        with:
+          scanMetadataReportFile: target/sonar/report-task.txt
+          pollingTimeoutSec: 600
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
