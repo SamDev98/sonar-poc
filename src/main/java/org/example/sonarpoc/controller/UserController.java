@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+    Logger logger = Logger.getLogger(getClass().getName());
 
     // Mantém o "smell" de credencial hardcoded
     private static final String DB_PASSWORD = ""; // H2 mem padrão: senha vazia
@@ -27,7 +29,7 @@ public class UserController {
     @GetMapping("/find")
     public UserProfile find(@RequestParam("name") String name) {
         // Smell: log de dado sensível + SQL injection
-        System.out.println("Searching user with name: " + name);
+        logger.info("Searching user with name");
         String sql = "SELECT NAME, EMAIL FROM USERS WHERE NAME = '" + name + "'"; // injecção
 
         UserProfile result = null;
