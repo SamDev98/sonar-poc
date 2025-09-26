@@ -12,6 +12,7 @@
     <properties>
         <java.version>21</java.version>
         <spring.boot.version>3.3.2</spring.boot.version>
+        <sonar.projectKey>com.example:sonar-poc</sonar.projectKey>
     </properties>
 
     <!-- mantém o BOM como você fez -->
