@@ -38,11 +38,24 @@ jobs:
       - name: Build & Test
         run: ./mvnw -B -U clean verify
 
+      - name: Debug Sonar connectivity
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          set -e
+          echo "SONAR_HOST_URL=$SONAR_HOST_URL"
+          # versão do servidor (não requer auth)
+          curl -fsS "$SONAR_HOST_URL/api/server/version" && echo
+          # validação do token (requer auth, deve retornar {"valid":true})
+          curl -fsS -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/authentication/validate" && echo
+
       - name: SonarQube Scan (Maven goal)
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # http://localhost:9000
           SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
-        run: ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar
+        run: ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar \
+          -Dsonar.token="${{ secrets.SONAR_TOKEN }}"
 
       - name: SonarQube Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@v1.2.0
