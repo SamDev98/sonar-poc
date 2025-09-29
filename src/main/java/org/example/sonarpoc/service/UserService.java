@@ -66,9 +66,4 @@ public class UserService {
         }
         return out;
     }
-
-    // TODO: implementar estratégia de retry com backoff exponencial
-    public void placeholderForSonarTest() {
-        // método propositalmente vazio
-    }
 }
