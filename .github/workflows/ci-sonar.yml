@@ -51,10 +51,15 @@ jobs:
           curl -fsS -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/authentication/validate" && echo
 
       - name: SonarQube Scan (Maven goal)
+        if: github.event_name == 'pull_request'
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # http://localhost:9000
-          SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
-        run: ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar \
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
 
       - name: SonarQube Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@v1.2.0

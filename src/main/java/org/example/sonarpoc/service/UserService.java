@@ -6,37 +6,52 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     public String normalizeName(String name) {
-        // duplicate block 1
-        if (name == null) {
+        if (name == null || name.isEmpty()) {
             return "";
         }
-        name = name.trim();
-        name = name.replaceAll("\\s+", " ");
-        name = name.toLowerCase();
-        return name;
+
+        String trimmedLower = name.trim().toLowerCase();
+        StringBuilder sb = new StringBuilder(trimmedLower.length());
+        boolean prevSpace = false;
+
+        for (char c : trimmedLower.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                if (!prevSpace) {
+                    sb.append(' ');
+                    prevSpace = true;
+                }
+            } else {
+                sb.append(c);
+                prevSpace = false;
+            }
+        }
+        return sb.toString();
     }
 
     public String normalizeName2(String name) {
-        // duplicate block 2 (intentionally duplicated to trigger duplication rule)
-        if (name == null) {
+        if (name == null || name.isEmpty()) {
             return "";
         }
-        name = name.trim();
-        name = name.replaceAll("\\s+", " ");
-        name = name.toLowerCase();
-        return name;
+
+        String[] parts = name.trim().toLowerCase().split("\\s+");
+        StringBuilder sb = new StringBuilder(name.length());
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].isEmpty()) continue;
+            if (i > 0) sb.append(' ');
+            sb.append(parts[i]);
+        }
+        return sb.toString();
     }
 
     public String overlyLongMethod(String input) {
-        // try to inflate cognitive complexity a bit
         String out = input;
         for (int i = 0; i < 5; i++) {
             if (out != null) {
-                if (out.length() > 0) {
+                if (!out.isEmpty()) {
                     if (out.contains("x")) {
-                        out = out.replace("x","y");
+                        out = out.replace("x", "y");
                     } else if (out.contains("y")) {
-                        out = out.replace("y","z");
+                        out = out.replace("y", "z");
                     } else if (out.contains("z")) {
                         out = out.toUpperCase();
                     } else {
@@ -50,5 +65,10 @@ public class UserService {
             }
         }
         return out;
+    }
+
+    // TODO: implementar estratégia de retry com backoff exponencial
+    public void placeholderForSonarTest() {
+        // método propositalmente vazio
     }
 }
